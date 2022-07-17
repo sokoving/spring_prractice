@@ -1,5 +1,6 @@
 package com.spring.practice.chap03.board.controller;
 
+import com.spring.practice.chap03.board.repository.Comment;
 import com.spring.practice.chap03.board.repository.Post;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -16,13 +17,14 @@ import java.util.List;
 public class BoardController {
 
 
-    private final BoardService service;
+    private final BoardService bService;
+    private final CommentService cService;
 
     // Post 목록 불러오는 요청 처리
     @GetMapping("/board/list")
     public String list(Model model) {
         log.info("/board/list GET 요청!");
-        List<Post> postList = service.listService();
+        List<Post> postList = bService.listService();
         model.addAttribute("pl", postList);
         return "chap03/board-list";
     }
@@ -31,8 +33,10 @@ public class BoardController {
     @GetMapping("/board/content")
     public String detail(int boardNo, Model model) {
         log.info("/board/detail GET 요청!");
-        Post post = service.detailService(boardNo);
+        Post post = bService.detailService(boardNo);
+        List<Comment> commentList = cService.listService(boardNo);
         model.addAttribute("p", post);
+        model.addAttribute("cl", commentList);
         return "chap03/board-detail";
     }
 
@@ -49,7 +53,7 @@ public class BoardController {
     public String write(String writer, String title, String content) {
         log.info("/board/write POST 요청! - {}, {}, {}", writer, title, content);
         Post newPost = new Post(writer, title, content);
-        service.writeService(newPost);
+        bService.writeService(newPost);
         return "redirect:/board/list";
 
     }
@@ -58,7 +62,7 @@ public class BoardController {
     @GetMapping("/board/delete")
     public String delete(int boardNo) {
         log.info("/board/delete GET 요청! - {}", boardNo);
-        service.deleteService(boardNo);
+        bService.deleteService(boardNo);
         return "redirect:/board/list";
     }
 
@@ -66,7 +70,7 @@ public class BoardController {
     @GetMapping("/board/modify")
     public String modify(int boardNo, Model model) {
         log.info("/board/modify GET 요청! - {}", boardNo);
-        Post post = service.modifyFormService(boardNo);
+        Post post = bService.modifyFormService(boardNo);
         model.addAttribute("p", post);
         return "chap03/board-modify";
     }
@@ -77,8 +81,16 @@ public class BoardController {
         log.info("/board/modify POST 요청! - {}, {}", writer, content);
         Post post = new Post(writer, title, content);
         post.setBoardNo(boardNo);
-        service.modifyService(post);
+        bService.modifyService(post);
         return "redirect:/board/list";
+    }
+
+    // 댓글 등록 요청
+    @PostMapping("/comment/save")
+    public String commentSave(int boardNo, String commentWriter, String commentContent){
+        Comment newComment = new Comment(boardNo, commentContent, commentWriter);
+        cService.saveService(newComment);
+        return "redirect:/board/content?boardNo=" + boardNo;
     }
 
 

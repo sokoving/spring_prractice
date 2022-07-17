@@ -49,15 +49,37 @@
         </div>
     </form>
 
+
+    <ul>
+        <li>
+            <form action="/comment/save" method="post">
+                <input type="text" name = "boardNo" value="${p.boardNo}" hidden >
+                <input type="text" name = "commentWriter" placeholder="댓글 작성자 이름">
+                <input type="text" name = "commentContent" placeholder="댓글 내용">
+                <button type="submit" id="comment-save-btn">등록</button>
+            </form>
+        </li>
+        <c:forEach var="c" items="${cl}">
+            <li>${c.commentWriter} : ${c.commentContent}
+                <button type="button" id="comment-remove-btn">삭제</button>
+            </li>
+        </c:forEach>
+    </ul>
+
+
+
     <script>
+
+
+        // 본문 버튼 (수정, 목록, 삭제)
         const $btn = document.getElementById('btn-wrap');
         $btn.addEventListener('click', e => {
             if (!e.target.matches('button')) {
                 return;
-            } 
+            }
             // 수정 화면 요청
-            else if (e.target.matches('#modi-btn')){
-                location.href="/board/modify?boardNo=${p.boardNo}"
+            else if (e.target.matches('#modi-btn')) {
+                location.href = "/board/modify?boardNo=${p.boardNo}"
             }
             // 목록으로
             else if (e.target.matches('#list-btn')) {
